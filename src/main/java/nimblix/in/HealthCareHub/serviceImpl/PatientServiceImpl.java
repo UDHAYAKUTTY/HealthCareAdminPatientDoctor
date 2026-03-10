@@ -109,19 +109,22 @@ public class PatientServiceImpl implements PatientService {
 //        return "Patient soft deleted successfully";
 //    }
 
-    @Override
-    public String softDeletePatient(Long id) {
+public boolean softDeletePatient(Long id) {
 
-        Patient patient = patientRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
+    Optional<Patient> optionalPatient = patientRepository.findById(id);
 
+    if(optionalPatient.isPresent()) {
+
+        Patient patient = optionalPatient.get();
         patient.setDeleted(true);
-
         patientRepository.save(patient);
 
-        return "Patient deleted successfully";
+        return true;
+
+    } else {
+        return false;
     }
+}
 
     public Patient savePatient(Patient patient) {
         // TODO Auto-generated method stub

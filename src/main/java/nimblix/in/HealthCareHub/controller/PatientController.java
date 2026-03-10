@@ -169,14 +169,25 @@ public class PatientController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<ApiResponse<Void>> deletePatient(@PathVariable Long id) {
 
-        String message = patientService.softDeletePatient(id);
+        boolean isDeleted = patientService.softDeletePatient(id);
 
         ApiResponse<Void> response = new ApiResponse<>();
-        response.setStatus("SUCCESS");
-        response.setMessage(message);
-        response.setData(null);
 
-        return ResponseEntity.ok(response);
+        if (isDeleted) {
+
+            response.setStatus("SUCCESS");
+            response.setMessage("Patient deleted successfully");
+            response.setData(null);
+
+            return ResponseEntity.ok(response);
+
+        } else {
+
+            response.setStatus("FAILURE");
+            response.setMessage("Patient not found with id: " + id);
+            response.setData(null);
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
-
 }
