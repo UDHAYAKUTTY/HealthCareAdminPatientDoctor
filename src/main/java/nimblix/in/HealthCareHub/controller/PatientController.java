@@ -1,7 +1,12 @@
 package nimblix.in.HealthCareHub.controller;
 
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import nimblix.in.HealthCareHub.constants.HealthCareConstants;
 import nimblix.in.HealthCareHub.model.Patient;
+import nimblix.in.HealthCareHub.model.Prescription;
+import nimblix.in.HealthCareHub.model.PrescriptionMedicines;
+import nimblix.in.HealthCareHub.model.Review;
+import nimblix.in.HealthCareHub.request.AdmitPatientRequest;
 import nimblix.in.HealthCareHub.request.PatientRegistrationRequest;
 import nimblix.in.HealthCareHub.response.*;
 import nimblix.in.HealthCareHub.service.AdmissionService;
@@ -56,5 +61,88 @@ public class PatientController {
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+    }
+
+    @PostMapping("/{patientId}/doctors/{doctorId}/review")
+    public ResponseEntity<Map<String,Object>> addDoctorReview(
+           @PathVariable Long patientId,
+           @PathVariable Long doctorId,
+           @RequestParam String comment,
+           @RequestParam int rating
+    ) {
+       Review data = patientService.addDoctorReview(patientId, doctorId, comment, rating);
+       Map<String,Object> response = new HashMap<>();
+       response.put("status", HttpStatus.CREATED.value());
+       response.put("message", "Patient review added successfully");
+       response.put("data", data);
+       return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/doctors/{doctorId}/reviews")
+    public ResponseEntity<Map<String,Object>> getDoctorReviews(@PathVariable Long doctorId) {
+       List<Review> data = patientService.getDoctorReviews(doctorId);
+       Map<String,Object> response = new HashMap<>();
+       response.put("status", HttpStatus.OK.value());
+       response.put("message", "Doctor reviews fetched successfully");
+       response.put("count", data.size());
+       response.put("data", data);
+       return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/{patientId}/review-by-doctor/{doctorId}")
+    public ResponseEntity<Map<String,Object>> addPatientReview(
+           @PathVariable Long patientId,
+           @PathVariable Long doctorId,
+           @RequestParam String comment,
+           @RequestParam int rating
+    ) {
+       Review data = patientService.addPatientReview(doctorId, patientId, comment, rating);
+       Map<String,Object> response = new HashMap<>();
+       response.put("status", HttpStatus.CREATED.value());
+       response.put("message", "Doctor review added successfully");
+       response.put("data", data);
+       return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{patientId}/reviews")
+    public ResponseEntity<Map<String,Object>> getPatientReviews(@PathVariable Long patientId) {
+       List<Review> data = patientService.getPatientReviews(patientId);
+       Map<String,Object> response = new HashMap<>();
+       response.put("status", HttpStatus.OK.value());
+       response.put("message", "Patient reviews fetched successfully");
+       response.put("count", data.size());
+       response.put("data", data);
+       return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<ApiResponse<List<Patient>>> filterPatients(
+            @RequestParam(required = false) Integer day,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year) {
+
+        List<Patient> patients;
+
+        if (day != null) {
+            patients = patientService.filterPatientsByDay(day);
+        }
+        else if (month != null) {
+            patients = patientService.filterPatientsByMonth(month);
+        }
+        else if (year != null) {
+            patients = patientService.filterPatientsByYear(year);
+        }
+        else {
+            patients = List.of();
+        }
+
+        ApiResponse<List<Patient>> response =
+                new ApiResponse<>(
+                        "200",
+                        "Patient records fetched successfully",
+                        patients
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

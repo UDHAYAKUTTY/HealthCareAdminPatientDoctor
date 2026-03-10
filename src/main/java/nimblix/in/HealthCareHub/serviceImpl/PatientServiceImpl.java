@@ -203,6 +203,20 @@ public boolean softDeletePatient(Long id) {
         return null;
     }
 
+    @Override
+    public List<Patient> filterPatientsByDay(int day) {
+        return patientRepository.findPatientsByDay(day);
+    }
+
+    @Override
+    public List<Patient> filterPatientsByMonth(int month) {
+        return patientRepository.findPatientsByMonth(month);
+    }
+
+    @Override
+    public List<Patient> filterPatientsByYear(int year) {
+        return patientRepository.findPatientsByYear(year);
+    }
 
 
 }
