@@ -23,5 +23,8 @@ public interface PatientService {
     List<Review> getDoctorReviews(Long doctorId);
     Review addPatientReview(Long doctorId, Long patientId, String comment, int rating);
     List<Review> getPatientReviews(Long patientId);
+
+
+
 }
 

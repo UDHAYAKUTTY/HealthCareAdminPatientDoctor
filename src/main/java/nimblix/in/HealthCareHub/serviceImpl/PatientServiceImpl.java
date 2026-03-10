@@ -96,6 +96,7 @@ public class PatientServiceImpl implements PatientService {
         }
     }
 
+    @Override
     public String softDeletePatient(Long id) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));

@@ -18,7 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -165,6 +167,24 @@ public class PatientController {
        response.put("count", data.size());
        response.put("data", data);
        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<String, Object>> deletePatient(@PathVariable Long id) {
+
+        String message = patientService.softDeletePatient(id);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("patientId", id);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+
+        response.put("status", "200");
+        response.put("message", message);
+        response.put("data", data);
+        response.put("timestamp", String.valueOf(LocalDateTime.now()));
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }
