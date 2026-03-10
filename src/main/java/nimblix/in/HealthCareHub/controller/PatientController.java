@@ -168,7 +168,7 @@ public class PatientController {
        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/patient/forgot-password")
+    @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse> forgotPassword(@RequestBody PatientRegistrationRequest request) {
 
         ApiResponse response = patientService.forgotPassword(request.getPhoneNumber(), request.getEmail());
@@ -176,7 +176,7 @@ public class PatientController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/patient/reset-password")
+    @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse> resetPassword(@RequestBody PatientRegistrationRequest request) {
 
         ApiResponse response = patientService.resetPassword(
