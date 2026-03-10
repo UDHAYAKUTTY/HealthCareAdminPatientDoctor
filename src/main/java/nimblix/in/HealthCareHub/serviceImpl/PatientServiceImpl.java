@@ -191,67 +191,68 @@ public class PatientServiceImpl implements PatientService {
         return null;
     }
 
+
     @Override
     public ApiResponse forgotPassword(String phoneNumber, String email) {
 
         ApiResponse response = new ApiResponse();
 
-        if(phoneNumber == null && email == null){
-            response.setStatus("Success");
-            response.setMessage("Phone number or email required");
-
-            return response;
-        }
-
         Optional<User> userOptional;
 
-        if(phoneNumber != null){
+        if (phoneNumber != null && !phoneNumber.isEmpty()) {
             userOptional = userRepository.findByPhoneNumber(phoneNumber);
-        } else {
+        } else if (email != null && !email.isEmpty()) {
             userOptional = userRepository.findByEmail(email);
-        }
-
-        if(!userOptional.isPresent()){
+        } else {
             response.setStatus("FAILURE");
-            response.setMessage("User not found");
-
+            response.setMessage("Phone number or email required");
             return response;
         }
 
-        response.setStatus("success");
-        response.setMessage("User verified. You can reset password.");
+        if (!userOptional.isPresent()) {
+            response.setStatus("FAILURE");
+            response.setMessage("User not found");
+            return response;
+        }
 
+        response.setStatus("SUCCESS");
+        response.setMessage("User verified. You can reset password.");
 
         return response;
     }
-
     @Override
     public ApiResponse resetPassword(String phoneNumber, String email, String newPassword) {
 
         ApiResponse response = new ApiResponse();
 
-        if(newPassword == null || newPassword.isEmpty()){
-            response.setStatus("SUCCESS");
+        // Check password
+        if (newPassword == null || newPassword.isEmpty()) {
+            response.setStatus("FAILURE");
             response.setMessage("New password required");
-
             return response;
         }
 
         Optional<User> userOptional;
 
-        if(phoneNumber != null){
+        // Check user by phone or email
+        if (phoneNumber != null && !phoneNumber.isEmpty()) {
             userOptional = userRepository.findByPhoneNumber(phoneNumber);
-        } else {
+        } else if (email != null && !email.isEmpty()) {
             userOptional = userRepository.findByEmail(email);
-        }
-
-        if(!userOptional.isPresent()){
+        } else {
             response.setStatus("FAILURE");
-            response.setMessage("User not found");
-
+            response.setMessage("Phone number or email required");
             return response;
         }
 
+        // User not found
+        if (!userOptional.isPresent()) {
+            response.setStatus("FAILURE");
+            response.setMessage("User not found");
+            return response;
+        }
+
+        // Update password
         User user = userOptional.get();
         user.setPassword(newPassword);
 
@@ -262,5 +263,4 @@ public class PatientServiceImpl implements PatientService {
 
         return response;
     }
-
 }
