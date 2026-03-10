@@ -2,15 +2,13 @@ package nimblix.in.HealthCareHub.controller;
 
 import lombok.RequiredArgsConstructor;
 import nimblix.in.HealthCareHub.constants.HealthCareConstants;
+import nimblix.in.HealthCareHub.model.Patient;
 import nimblix.in.HealthCareHub.model.Prescription;
 import nimblix.in.HealthCareHub.model.PrescriptionMedicines;
 import nimblix.in.HealthCareHub.model.Review;
 import nimblix.in.HealthCareHub.request.AdmitPatientRequest;
 import nimblix.in.HealthCareHub.request.PatientRegistrationRequest;
-import nimblix.in.HealthCareHub.response.AdmitPatientResponse;
-import nimblix.in.HealthCareHub.response.LabResultResponse;
-import nimblix.in.HealthCareHub.response.PrescriptionMedicineResponse;
-import nimblix.in.HealthCareHub.response.PrescriptionResponse;
+import nimblix.in.HealthCareHub.response.*;
 import nimblix.in.HealthCareHub.service.AdmissionService;
 import nimblix.in.HealthCareHub.service.LabResultService;
 import nimblix.in.HealthCareHub.service.PatientService;
@@ -18,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -167,4 +166,35 @@ public class PatientController {
        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<ApiResponse<List<Patient>>> filterPatients(
+            @RequestParam(required = false) Integer day,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year) {
+
+        List<Patient> patients;
+
+        if (day != null) {
+            patients = patientService.filterPatientsByDay(day);
+        }
+        else if (month != null) {
+            patients = patientService.filterPatientsByMonth(month);
+        }
+        else if (year != null) {
+            patients = patientService.filterPatientsByYear(year);
+        }
+        else {
+            patients = List.of();
+        }
+
+        ApiResponse<List<Patient>> response =
+                new ApiResponse<>(
+                        "200",
+                        "Patient records fetched successfully",
+                        patients,
+                        String.valueOf(LocalDateTime.now())
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
