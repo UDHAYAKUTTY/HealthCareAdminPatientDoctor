@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nimblix.in.HealthCareHub.constants.HealthCareConstants;
 import nimblix.in.HealthCareHub.model.Doctor;
+import nimblix.in.HealthCareHub.request.DoctorAvailabilityRequest;
 import nimblix.in.HealthCareHub.request.DoctorRegistrationRequest;
 import nimblix.in.HealthCareHub.request.DoctorScheduleRequest;
 import nimblix.in.HealthCareHub.response.*;
@@ -198,14 +199,30 @@ public class DoctorController {
 //        return ResponseEntity.ok(availabilityList);
 //    }
 
+
     @PostMapping("/availability")
-    public ResponseEntity<Map<String, Object>> setDoctorAvailability(
-            @RequestBody DoctorRegistrationRequest request) {
-        String message = doctorService.setDoctorAvailability(request);
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put(HealthCareConstants.STATUS, HttpStatus.OK.value());
-        result.put(HealthCareConstants.MESSAGE, message);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<DoctorAvailabilityResponse>> setDoctorAvailability(
+            @RequestBody DoctorAvailabilityRequest request) {
+
+        // Edge Case 1: null request body
+        if (request == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ApiResponse<>(HealthCareConstants.FAILED,
+                            "Request body cannot be null", null));
+        }
+
+        // Edge Case 2: missing doctorId in request
+        if (request.getDoctorId() == null || request.getDoctorId() <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ApiResponse<>(HealthCareConstants.FAILED,
+                            "Doctor ID is required and must be greater than 0", null));
+        }
+
+        DoctorAvailabilityResponse data = doctorService.setDoctorAvailability(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new ApiResponse<>(HealthCareConstants.SUCCESS,
+                        "Doctor availability set successfully", data));
     }
 
     @GetMapping("/{doctorId}/availability")
@@ -229,29 +246,51 @@ public class DoctorController {
         result.put(HealthCareConstants.DATA, doctors);
         return ResponseEntity.ok(result);
     }
-
-    // setting that doctor status put/api/doctors/{doctorId}/status?status=IN_OPERATION
+    // Response : ApiResponse<DoctorStatusResponse>  (was Map<String, Object> with just a String message)
     @PutMapping("/{doctorId}/status")
-    public ResponseEntity<Map<String, Object>> updateDoctorStatus(
+    public ResponseEntity<ApiResponse<DoctorStatusResponse>> updateDoctorStatus(
             @PathVariable Long doctorId,
             @RequestParam String status) {
-        String message = doctorService.updateDoctorStatus(doctorId, status);
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put(HealthCareConstants.STATUS, HttpStatus.OK.value());
-        result.put(HealthCareConstants.MESSAGE, message);
-        return ResponseEntity.ok(result);
+
+        // Edge Case 1: invalid doctorId
+        if (doctorId <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ApiResponse<>(HealthCareConstants.FAILED,
+                            "Doctor ID must be greater than 0", null));
+        }
+
+        // Edge Case 2: blank status
+        if (status == null || status.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ApiResponse<>(HealthCareConstants.FAILED,
+                            "Status parameter cannot be blank", null));
+        }
+
+        DoctorStatusResponse data = doctorService.updateDoctorStatus(doctorId, status);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(HealthCareConstants.SUCCESS,
+                        "Doctor status updated successfully", data));
     }
 
-    /*  getting Doctor Status GET /api/doctors/{doctorId}/status */
+    //  CHANGED — Edge cases handled in service
+    // Response : ApiResponse<DoctorStatusResponse>  (was Map<String, Object> wrapping DoctorStatusResponse)
     @GetMapping("/{doctorId}/status")
-    public ResponseEntity<Map<String, Object>> getDoctorStatus(
+    public ResponseEntity<ApiResponse<DoctorStatusResponse>> getDoctorStatus(
             @PathVariable Long doctorId) {
-        DoctorStatusResponse response = doctorService.getDoctorStatus(doctorId);
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put(HealthCareConstants.STATUS, HttpStatus.OK.value());
-        result.put(HealthCareConstants.MESSAGE, "Doctor status fetched successfully");
-        result.put(HealthCareConstants.DATA, response);
-        return ResponseEntity.ok(result);
+
+        // Edge Case 1: invalid doctorId
+        if (doctorId <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ApiResponse<>(HealthCareConstants.FAILED,
+                            "Doctor ID must be greater than 0", null));
+        }
+
+        DoctorStatusResponse data = doctorService.getDoctorStatus(doctorId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(HealthCareConstants.SUCCESS,
+                        "Doctor status fetched successfully", data));
     }
 
 //    @PostMapping("/{doctorId}/schedule")

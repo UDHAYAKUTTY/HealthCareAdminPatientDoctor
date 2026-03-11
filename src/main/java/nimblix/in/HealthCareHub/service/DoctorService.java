@@ -1,6 +1,7 @@
 package nimblix.in.HealthCareHub.service;
 
 import nimblix.in.HealthCareHub.model.Doctor;
+import nimblix.in.HealthCareHub.request.DoctorAvailabilityRequest;
 import nimblix.in.HealthCareHub.request.DoctorRegistrationRequest;
 import nimblix.in.HealthCareHub.request.DoctorScheduleRequest;
 import nimblix.in.HealthCareHub.response.*;
@@ -15,8 +16,8 @@ public interface DoctorService {
     ResponseEntity<?> getDoctorDetails(Long doctorId, Long hospitalId);
     DoctorReviewResponse getDoctorReviews(Long doctorId);
     String updateDoctorDetails(DoctorRegistrationRequest request);
-
     String deleteDoctorDetails(Long doctorId);
+    DoctorProfileResponse getDoctorById(Long doctorId);
     Doctor getDoctorById(Long doctorId);
 
     List<String> getAllRoles();
@@ -24,10 +25,12 @@ public interface DoctorService {
     DoctorListResponse getDoctorsByHospitalId(Long hospitalId);
     List<Doctor> filterDoctorsBySpecialization(String specialization);
     List<DoctorAvailabilityResponse> getAllAvailableDoctors();
-    List<Map<String, Object>> getDoctorAvailability(Long doctoId);
+    List<Map<String, Object>> getDoctorAvailability(Long doctorId);
     DoctorProfileResponse addDoctor(DoctorRegistrationRequest request);
-    String setDoctorAvailability(DoctorRegistrationRequest request);
-    String updateDoctorStatus(Long doctorId, String status);
+
+    DoctorAvailabilityResponse setDoctorAvailability(DoctorAvailabilityRequest request);
+    DoctorStatusResponse updateDoctorStatus(Long doctorId, String status);
+
     DoctorStatusResponse getDoctorStatus(Long doctorId);
     DoctorScheduleResponse createDoctorSchedule(Long doctorId, DoctorScheduleRequest request);
     List<DoctorScheduleResponse> getDoctorSchedules(Long doctorId);
